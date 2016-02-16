@@ -1,0 +1,39 @@
+.sf-popup-modal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background-color: #FFFFFF;
+  overflow: auto;
+  z-index: 1000;
+  width: auto;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  box-shadow: 0 16px 28px 0 rgba(0, 0, 0, 0.22), 0 25px 55px 0 rgba(0, 0, 0, 0.21);
+  &.visible {
+    opacity: 1;
+    z-index: 1001;
+  }
+}
+
+.sf-popup-backdrop {
+  top: 0;
+  left: 0;
+  position: fixed;
+  background-color: #000;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  &.visible {
+    opacity: 0.4;
+    z-index: 1000;
+  }
+}
+
