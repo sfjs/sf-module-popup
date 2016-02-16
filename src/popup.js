@@ -16,7 +16,13 @@ Popup.prototype._construct = function (sf, node, options) {
         this.options = Object.assign(this.options, options);
     }
 
-    //elements
+    if (!this.options.predefinedData && !this.options.dataURL) {
+        console.warn('No data or URL to fetch data is passed');
+    }
+    if (!this.options.predefinedTemplate && !this.options.templateURL) {
+        console.warn('No template or URL to fetch template is passed');
+    }
+
     this.els = {
         node: node,
         modal: document.createElement("div"),
@@ -38,6 +44,31 @@ Popup.prototype.optionsToGrab =
     dataURL: {
         value: false,
         domAttr: "data-data-url"
+    },
+    /**
+     *  Pass data in JSON-encoded format <b>Default: false</b>
+     */
+    predefinedData: {
+        value: false,
+        domAttr: "data-predefined-data",
+        processor: function (node, val, self) {
+            if (!val) return this.value;
+            if (typeof val == "string") {
+                try {
+                    val = JSON.parse(val);
+                } catch (e) {
+                    console.error("Popup data JSON.parse error: ", e);
+                }
+            }
+            return Object.assign(self.value, val);
+        }
+    },
+    /**
+     *  Pass html template as data-attribute <b>Default: false</b>
+     */
+    predefinedTemplate: {
+        value: false,
+        key: "data-predefined-template"
     },
     /**
      *  URL to get template from <b>Default: false</b>
