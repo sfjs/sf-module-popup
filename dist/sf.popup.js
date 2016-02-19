@@ -110,6 +110,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Popup.prototype.name = "popup";
 	
 	Popup.prototype._construct = function (sf, node, options) {
+	    var that = this;
 	    this.init(sf, node, options); //call parent
 	
 	    if (options) {
@@ -117,39 +118,63 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.options = (0, _assign2.default)(this.options, options);
 	    }
 	
-	    if (!this.options.predefinedData && !this.options.dataURL) {
-	        console.warn('No data or URL to fetch data is passed');
-	    }
-	    if (!this.options.predefinedTemplate && !this.options.templateURL) {
-	        console.warn('No template or URL to fetch template is passed');
-	    }
-	
 	    this.els = {
 	        node: node,
 	        modal: document.createElement("div"),
-	        backdrop: document.createElement("div")
+	        backdrop: document.createElement("div"),
+	        template: document.querySelector(this.options.templateSelector)
 	    };
+	
+	    this.pattern = /\${.*?(?=})}/gi;
+	    this.matches = [];
+	
+	    if (this.els.template) this.parseTemplate();
+	
+	    this.matches.forEach(function (variable) {
+	        that.els.template.innerHTML = that.els.template.innerHTML.replace('${' + variable + '}', that.deepObjectValue(that.options.data, variable));
+	    });
+	    this.els.modal.innerHTML = this.els.template.innerHTML;
+	
+	    if (!this.options.data && !this.options.url) console.warn('No data or URL to fetch data provided');
+	    if (!this.options.templateSelector) console.warn('No template selector provided');
+	    if (!this.els.template && this.options.templateSelector) console.warn('No template found with provided selector');
 	
 	    this.els.modal.classList.add('sf-popup-modal');
 	    this.els.backdrop.classList.add('sf-popup-backdrop');
 	
 	    this.addEventListeners();
+	    this.addModalEventListeners();
+	};
+	
+	Popup.prototype.deepObjectValue = function (o, s) {
+	    s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
+	    s = s.replace(/^\./, ''); // strip a leading dot
+	    var a = s.split('.');
+	    for (var i = 0, n = a.length; i < n; ++i) {
+	        var k = a[i];
+	        if (k in o) {
+	            o = o[k];
+	        } else {
+	            return;
+	        }
+	    }
+	    return o;
 	};
 	
 	Popup.prototype.optionsToGrab = {
 	    /**
 	     * URL to get data from <b>Default: false</b>
 	     */
-	    dataURL: {
+	    url: {
 	        value: false,
-	        domAttr: "data-data-url"
+	        domAttr: "data-url"
 	    },
 	    /**
 	     *  Pass data in JSON-encoded format <b>Default: false</b>
 	     */
-	    predefinedData: {
+	    data: {
 	        value: false,
-	        domAttr: "data-predefined-data",
+	        domAttr: "data-data",
 	        processor: function processor(node, val, self) {
 	            if (!val) return this.value;
 	            if (typeof val == "string") {
@@ -163,25 +188,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    },
 	    /**
-	     *  Pass html template as data-attribute <b>Default: false</b>
+	     *  Template selector to search in document <b>Default: false</b>
 	     */
-	    predefinedTemplate: {
+	    templateSelector: {
 	        value: false,
-	        key: "data-predefined-template"
-	    },
-	    /**
-	     *  URL to get template from <b>Default: false</b>
-	     */
-	    templateURL: {
-	        value: false,
-	        key: "data-template-url"
+	        domAttr: "data-template"
 	    }
 	
+	};
+	
+	Popup.prototype.parseTemplate = function () {
+	    var match;
+	    while (match = this.pattern.exec(this.els.template.innerHTML)) {
+	        this.matches.push(match[0].substring(2, match[0].length - 1));
+	    }
 	};
 	
 	Popup.prototype.generatePopup = function () {
 	    //todo fetch template & data and iterate then
 	    this.openPopup();
+	};
+	
+	Popup.prototype.fetchData = function () {
+	    _sf2.default.ajax.send({
+	        url: this.options.url
+	    }).then(function (answer) {}, function (error) {
+	
+	        return error;
+	    });
 	};
 	
 	Popup.prototype.openPopup = function () {
@@ -192,8 +226,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        that.els.modal.classList.add('visible');
 	        that.els.backdrop.classList.add('visible');
 	    }, 0);
-	    this.addModalEventListeners();
-	    this.removeEventListeners();
 	};
 	
 	Popup.prototype.closePopup = function () {
@@ -205,9 +237,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        that.els.modal.parentNode.removeChild(that.els.modal);
 	        that.els.backdrop.parentNode.removeChild(that.els.backdrop);
 	    }, 300);
-	
-	    this.removeModalEventListeners();
-	    this.addEventListeners();
 	};
 	
 	/**
@@ -245,7 +274,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	
 	Popup.prototype.removeModalEventListeners = function () {
-	    this.els.backdrop.removeEventListener("click", this._closePopup);
+	    if (this.els.backdrop) {
+	        this.els.backdrop.removeEventListener("click", this._closePopup);
+	    }
 	};
 	
 	Popup.prototype.die = function () {

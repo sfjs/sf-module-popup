@@ -6,11 +6,26 @@
     <link rel="stylesheet" href="sf.css"/>
 </head>
 <body>
-<form action="response.php" method="post" class="js-sf-form">
+<form action="response.php" method="post" class="">
     <div class="item-form">
     </div>
-    <input type="button" value="Popup node" class="js-sf-popup">
+    <input type="button" value="Popup node" class="js-sf-popup"
+           data-template="#template"
+           data-data='{"name":"John","justOneVariable":"someValue","buttons":{"labels":{"first":"First Button Label","second":"Second Button Label"}}}'>
 </form>
+
+
+
+<script type="text/x-handlebars-template" id="template">
+    <h1>Lorem Ipsum</h1>
+    <h2>Hello, ${name}</h2>
+
+    <div>Lorem Ipsum is ${justOneVariable} ${name} simply dummy text of the printing and typesetting industry. ${anotherOne} Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. </div>
+    <div class="footer">
+        <button class="btn">${buttons.labels.first}</button>
+        <button class="btn">${buttons.labels.second}</button>
+    </div>
+</script>
 
 <script src="sf.min.js"></script>
 <script src="sf.form.min.js"></script>
