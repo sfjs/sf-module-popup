@@ -17,6 +17,8 @@ Popup.prototype._construct = function (sf, node, options) {
         this.options = Object.assign(this.options, options);
     }
 
+    this.data = {};
+
     this.els = {
         node: node,
         modal: document.createElement("div"),
@@ -27,12 +29,11 @@ Popup.prototype._construct = function (sf, node, options) {
     this.pattern = /\${.*?(?=})}/gi;
     this.matches = [];
 
+    this.fetchData();
+
     if (this.els.template) this.parseTemplate();
 
-    this.matches.forEach(function (variable) {
-        that.els.template.innerHTML = that.els.template.innerHTML.replace('${' + variable + '}', that.deepObjectValue(that.options.data, variable))
-    });
-        this.els.modal.innerHTML = this.els.template.innerHTML;
+    this.els.modal.innerHTML = this.els.template.innerHTML;
 
     if (!this.options.data && !this.options.url) console.warn('No data or URL to fetch data provided');
     if (!this.options.templateSelector) console.warn('No template selector provided');
@@ -55,6 +56,13 @@ Popup.prototype.optionsToGrab =
     url: {
         value: false,
         domAttr: "data-url"
+    },
+    /**
+     * Object name with Data fetched from server with data-url <b>Default: data</b>
+     */
+    responseDataName: {
+        value: "data",
+        domAttr: "data-response-data-name"
     },
     /**
      *  Pass data in JSON-encoded format <b>Default: false</b>
@@ -100,9 +108,14 @@ Popup.prototype.deepObjectValue = function (o, s) {
 };
 
 Popup.prototype.parseTemplate = function () {
-    var match;
+    var match, that = this;
+
     while (match = this.pattern.exec(this.els.template.innerHTML))
-        this.matches.push(match[0].substring(2, match[0].length-1));
+        this.matches.push(match[0].substring(2, match[0].length - 1));
+
+    this.matches.forEach(function (variable) {
+        that.els.template.innerHTML = that.els.template.innerHTML.replace('${' + variable + '}', that.deepObjectValue(that.options.data, variable))
+    });
 };
 
 Popup.prototype.generatePopup = function () {
@@ -111,14 +124,20 @@ Popup.prototype.generatePopup = function () {
 };
 
 Popup.prototype.fetchData = function () {
-    sf.ajax.send({
-        url: this.options.url
-    }).then(function (answer) {
-
-    }, function (error) {
-
-        return error;
-    })
+    var that = this;
+    if (this.options.url) {
+        sf.ajax.send({
+            url: this.options.url
+        }).then(function (answer) {
+            Object.assign(that.data, answer[that.options.responseDataName], that.options.data);
+        }, function (error) {
+            console.warn('Error has occured during fetching data from given URL');
+            return error;
+        });
+    } else {
+        Object.assign(that.data, that.options.data);
+    }
+    //todo after generating data
 };
 
 Popup.prototype.openPopup = function () {

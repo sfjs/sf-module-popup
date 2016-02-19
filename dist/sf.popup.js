@@ -118,6 +118,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.options = (0, _assign2.default)(this.options, options);
 	    }
 	
+	    this.data = {};
+	
 	    this.els = {
 	        node: node,
 	        modal: document.createElement("div"),
@@ -128,11 +130,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.pattern = /\${.*?(?=})}/gi;
 	    this.matches = [];
 	
+	    this.fetchData();
+	
 	    if (this.els.template) this.parseTemplate();
 	
-	    this.matches.forEach(function (variable) {
-	        that.els.template.innerHTML = that.els.template.innerHTML.replace('${' + variable + '}', that.deepObjectValue(that.options.data, variable));
-	    });
 	    this.els.modal.innerHTML = this.els.template.innerHTML;
 	
 	    if (!this.options.data && !this.options.url) console.warn('No data or URL to fetch data provided');
@@ -146,21 +147,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.addModalEventListeners();
 	};
 	
-	Popup.prototype.deepObjectValue = function (o, s) {
-	    s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
-	    s = s.replace(/^\./, ''); // strip a leading dot
-	    var a = s.split('.');
-	    for (var i = 0, n = a.length; i < n; ++i) {
-	        var k = a[i];
-	        if (k in o) {
-	            o = o[k];
-	        } else {
-	            return;
-	        }
-	    }
-	    return o;
-	};
-	
 	Popup.prototype.optionsToGrab = {
 	    /**
 	     * URL to get data from <b>Default: false</b>
@@ -168,6 +154,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    url: {
 	        value: false,
 	        domAttr: "data-url"
+	    },
+	    /**
+	     * Object name with Data fetched from server with data-url <b>Default: data</b>
+	     */
+	    responseDataName: {
+	        value: "data",
+	        domAttr: "data-response-data-name"
 	    },
 	    /**
 	     *  Pass data in JSON-encoded format <b>Default: false</b>
@@ -197,11 +190,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	};
 	
+	Popup.prototype.deepObjectValue = function (o, s) {
+	    s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
+	    s = s.replace(/^\./, ''); // strip a leading dot
+	    var a = s.split('.');
+	    for (var i = 0, n = a.length; i < n; ++i) {
+	        var k = a[i];
+	        if (k in o) {
+	            o = o[k];
+	        } else {
+	            return;
+	        }
+	    }
+	    return o;
+	};
+	
 	Popup.prototype.parseTemplate = function () {
-	    var match;
+	    var match,
+	        that = this;
+	
 	    while (match = this.pattern.exec(this.els.template.innerHTML)) {
 	        this.matches.push(match[0].substring(2, match[0].length - 1));
-	    }
+	    }this.matches.forEach(function (variable) {
+	        that.els.template.innerHTML = that.els.template.innerHTML.replace('${' + variable + '}', that.deepObjectValue(that.options.data, variable));
+	    });
 	};
 	
 	Popup.prototype.generatePopup = function () {
@@ -210,10 +222,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	
 	Popup.prototype.fetchData = function () {
+	
+	    var that = this,
+	        dataFromServer = {};
 	    _sf2.default.ajax.send({
 	        url: this.options.url
-	    }).then(function (answer) {}, function (error) {
-	
+	    }).then(function (answer) {
+	        dataFromServer = answer[that.options.responseDataName];
+	        (0, _assign2.default)(that.data, dataFromServer, that.options.data);
+	        console.log(that.data);
+	    }, function (error) {
+	        console.warn('Error has occured during fetching data from given URL');
 	        return error;
 	    });
 	};
