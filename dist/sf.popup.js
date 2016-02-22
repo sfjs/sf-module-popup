@@ -139,7 +139,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.els.backdrop.classList.add('sf-popup-backdrop');
 	
 	    this.addEventListeners();
-	    this.addModalEventListeners();
 	};
 	
 	Popup.prototype.optionsToGrab = {
@@ -205,11 +204,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        that = this,
 	        variable,
 	        template = this.els.template.innerHTML;
+	
 	    while (match = this.pattern.exec(template)) {
 	        variable = match[0].substring(2, match[0].length - 1);
 	        this.matches.push(variable);
 	        template = template.replace(match[0], that.deepObjectValue(that.data, variable) || ""); //if there is no value, then ""
 	    }
+	
 	    this.els.modal.innerHTML = template;
 	    this.modalReady = true;
 	    this.openPopup();
@@ -273,9 +274,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this._generatePopup = function () {
 	        that.generatePopup();
 	    };
+	    this._closePopup = function () {
+	        that.closePopup();
+	    };
 	
 	    if (this.els.node) {
 	        this.els.node.addEventListener('click', this._generatePopup);
+	    }
+	    if (this.els.backdrop) {
+	        this.els.backdrop.addEventListener("click", this._closePopup);
 	    }
 	};
 	
@@ -283,22 +290,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this.els.node) {
 	        this.els.node.removeEventListener('change', this._generatePopup);
 	    }
-	};
-	
-	/**
-	 * Adds events listeners for modal.
-	 */
-	Popup.prototype.addModalEventListeners = function () {
-	    var that = this;
-	
-	    this._closePopup = function () {
-	        that.closePopup();
-	    };
-	
-	    this.els.backdrop.addEventListener("click", this._closePopup);
-	};
-	
-	Popup.prototype.removeModalEventListeners = function () {
 	    if (this.els.backdrop) {
 	        this.els.backdrop.removeEventListener("click", this._closePopup);
 	    }
@@ -306,7 +297,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	Popup.prototype.die = function () {
 	    this.removeEventListeners();
-	    this.removeModalEventListeners();
 	    delete this;
 	};
 	

@@ -8,6 +8,7 @@ $response = array(
         'second'    => 'second suggestion',
         'third'     => 'third suggestion',
         'fourth'    => 'fourth suggestion',
+        'url'       => 'testURL'
     )
 );
 

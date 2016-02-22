@@ -39,8 +39,6 @@ Popup.prototype._construct = function (sf, node, options) {
     this.els.backdrop.classList.add('sf-popup-backdrop');
 
     this.addEventListeners();
-    this.addModalEventListeners();
-
 };
 
 Popup.prototype.optionsToGrab =
@@ -175,9 +173,15 @@ Popup.prototype.addEventListeners = function () {
     this._generatePopup = function(){
         that.generatePopup();
     };
+    this._closePopup = function(){
+        that.closePopup();
+    };
 
     if (this.els.node) {
         this.els.node.addEventListener('click', this._generatePopup);
+    }
+    if (this.els.backdrop) {
+        this.els.backdrop.addEventListener("click", this._closePopup);
     }
 };
 
@@ -185,31 +189,14 @@ Popup.prototype.removeEventListeners = function () {
     if (this.els.node) {
         this.els.node.removeEventListener('change', this._generatePopup);
     }
-};
-
-/**
- * Adds events listeners for modal.
- */
-Popup.prototype.addModalEventListeners = function () {
-    var that = this;
-
-    this._closePopup = function(){
-        that.closePopup();
-    };
-
-    this.els.backdrop.addEventListener("click", this._closePopup);
-
-};
-
-Popup.prototype.removeModalEventListeners = function () {
     if (this.els.backdrop) {
         this.els.backdrop.removeEventListener("click", this._closePopup);
     }
 };
 
+
 Popup.prototype.die = function () {
     this.removeEventListeners();
-    this.removeModalEventListeners();
     delete this;
 };
 
