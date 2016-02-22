@@ -110,7 +110,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	Popup.prototype.name = "popup";
 	
 	Popup.prototype._construct = function (sf, node, options) {
-	    var that = this;
 	    this.init(sf, node, options); //call parent
 	
 	    if (options) {
@@ -127,14 +126,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        template: document.querySelector(this.options.templateSelector)
 	    };
 	
-	    this.pattern = /\${.*?(?=})}/gi;
+	    this.modalReady = false;
+	
+	    this.pattern = /\${.*?(?=})}/;
 	    this.matches = [];
-	
-	    this.fetchData();
-	
-	    if (this.els.template) this.parseTemplate();
-	
-	    this.els.modal.innerHTML = this.els.template.innerHTML;
 	
 	    if (!this.options.data && !this.options.url) console.warn('No data or URL to fetch data provided');
 	    if (!this.options.templateSelector) console.warn('No template selector provided');
@@ -207,34 +202,45 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	Popup.prototype.parseTemplate = function () {
 	    var match,
-	        that = this;
-	
-	    while (match = this.pattern.exec(this.els.template.innerHTML)) {
-	        this.matches.push(match[0].substring(2, match[0].length - 1));
-	    }this.matches.forEach(function (variable) {
-	        that.els.template.innerHTML = that.els.template.innerHTML.replace('${' + variable + '}', that.deepObjectValue(that.options.data, variable));
-	    });
-	};
-	
-	Popup.prototype.generatePopup = function () {
-	    //todo fetch template & data and iterate then
+	        that = this,
+	        variable,
+	        template = this.els.template.innerHTML;
+	    while (match = this.pattern.exec(template)) {
+	        variable = match[0].substring(2, match[0].length - 1);
+	        this.matches.push(variable);
+	        template = template.replace(match[0], that.deepObjectValue(that.data, variable) || ""); //if there is no value, then ""
+	    }
+	    this.els.modal.innerHTML = template;
+	    this.modalReady = true;
 	    this.openPopup();
 	};
 	
-	Popup.prototype.fetchData = function () {
+	Popup.prototype.generatePopup = function () {
+	    if (this.modalReady) {
+	        this.openPopup();
+	    } else {
+	        this.fetchData();
+	    }
+	};
 	
-	    var that = this,
-	        dataFromServer = {};
-	    _sf2.default.ajax.send({
-	        url: this.options.url
-	    }).then(function (answer) {
-	        dataFromServer = answer[that.options.responseDataName];
-	        (0, _assign2.default)(that.data, dataFromServer, that.options.data);
-	        console.log(that.data);
-	    }, function (error) {
-	        console.warn('Error has occured during fetching data from given URL');
-	        return error;
-	    });
+	Popup.prototype.fetchData = function () {
+	    var that = this;
+	    if (this.els.template) {
+	        if (this.options.url) {
+	            _sf2.default.ajax.send({
+	                url: this.options.url
+	            }).then(function (answer) {
+	                (0, _assign2.default)(that.data, answer[that.options.responseDataName], that.options.data);
+	                that.parseTemplate();
+	            }, function (error) {
+	                console.warn('Error has occured during fetching data from given URL');
+	                return error;
+	            });
+	        } else {
+	            (0, _assign2.default)(that.data, that.options.data);
+	            this.parseTemplate();
+	        }
+	    }
 	};
 	
 	Popup.prototype.openPopup = function () {
