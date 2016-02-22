@@ -7,7 +7,7 @@
 </head>
 <body>
 
-<div class="js-sf-popup" data-template="#template" data-url="response.php"
+<div class="js-sf-popup" data-template="#template" data-url="response.php" data-delimiters="{{,}}"
      data-data='{"name":"John","buttons":{"labels":{"first":"Send form"}}}'>
     Open Popup
 </div>
@@ -18,14 +18,14 @@
 </div>
 
 <script type="text/x-handlebars-template" id="template">
-    <form action="${url}.php" class="js-sf-form">
+    <form action="{{url}}.php" class="js-sf-form">
     <h1>Lorem Ipsum</h1>
-    <h2>Hello, ${name}</h2>
+    <h2>Hello, {{name}}</h2>
 
-    <div>Lorem Ipsum is ${first} ${name}'s simply dummy text of the printing and typesetting industry.</div>
+    <div>Lorem Ipsum is {{first}} {{name}}'s simply dummy text of the printing and typesetting industry.</div>
 
     <div class="footer">
-        <button class="submit">${buttons.labels.first}</button>
+        <button class="submit">{{buttons.labels.first}}</button>
     </div>
     </form>
 </script>

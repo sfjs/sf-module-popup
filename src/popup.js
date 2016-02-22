@@ -27,7 +27,8 @@ Popup.prototype._construct = function (sf, node, options) {
 
     this.modalReady = false;
 
-    this.pattern = /\${.*?(?=})}/;
+    //this.pattern = /\${.*?(?=})}/;
+    this.pattern = new RegExp("\\"+this.options.delimiters[0] + ".*?(?=" + this.options.delimiters[1] + ")" + this.options.delimiters[1]);
     this.matches = [];
 
     if (!this.options.data && !this.options.url) console.warn('No data or URL to fetch data provided');
@@ -56,6 +57,16 @@ Popup.prototype.optionsToGrab =
     responseDataName: {
         value: "data",
         domAttr: "data-response-data-name"
+    },
+    /**
+     * Delimiters to parse variables in template <b>Default: "{{,}}"</b>
+     */
+    delimiters: {
+        value: "{{,}}",
+        domAttr: "data-delimiters",
+        processor: function(node, val){
+            return val.split(',')
+        }
     },
     /**
      *  Pass data in JSON-encoded format <b>Default: false</b>
@@ -104,7 +115,7 @@ Popup.prototype.parseTemplate = function () {
     var match, that = this, variable, template = this.els.template.innerHTML;
 
     while (match = this.pattern.exec(template)){
-        variable = match[0].substring(2, match[0].length - 1);
+        variable = match[0].substring(that.options.delimiters[0].length, match[0].length - that.options.delimiters[1].length);
         this.matches.push(variable);
         template = template.replace(match[0], that.deepObjectValue(that.data, variable) || ""); //if there is no value, then ""
     }
