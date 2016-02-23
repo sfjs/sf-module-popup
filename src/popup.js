@@ -26,13 +26,13 @@ Popup.prototype._construct = function (sf, node, options) {
     };
 
     this.modalReady = false;
+    this.templateRequested = false;
 
-    //this.pattern = /\${.*?(?=})}/;
     this.pattern = new RegExp("\\"+this.options.delimiters[0] + ".*?(?=" + this.options.delimiters[1] + ")" + this.options.delimiters[1]);
     this.matches = [];
 
     if (!this.options.data && !this.options.url) console.warn('No data or URL to fetch data provided');
-    if (!this.options.templateSelector) console.warn('No template selector provided');
+    if (!this.options.templateSelector && !this.options.templateURL) console.warn('No template selector or URL provided');
     if (!this.els.template && this.options.templateSelector) console.warn('No template found with provided selector');
 
 
@@ -57,6 +57,13 @@ Popup.prototype.optionsToGrab =
     responseDataName: {
         value: "data",
         domAttr: "data-response-data-name"
+    },
+    /**
+     * Object name with Template fetched from server with data-template-url <b>Default: data</b>
+     */
+    responseTemplateName: {
+        value: "template",
+        domAttr: "data-response-template-name"
     },
     /**
      * Delimiters to parse variables in template <b>Default: "{{,}}"</b>
@@ -92,6 +99,13 @@ Popup.prototype.optionsToGrab =
     templateSelector: {
         value: false,
         domAttr: "data-template"
+    },
+    /**
+     *  URL to get template from <b>Default: false</b>
+     */
+    templateURL: {
+        value: false,
+        domAttr: "data-template-url"
     }
 
 };
@@ -149,6 +163,20 @@ Popup.prototype.fetchData = function () {
         } else {
             Object.assign(that.data, that.options.data);
             this.parseTemplate();
+        }
+    } else {
+        if (this.options.templateURL && !this.templateRequested) {
+            this.templateRequested = true;
+            sf.ajax.send({
+                url: this.options.templateURL
+            }).then(function (answer) {
+                that.els.template = document.createElement('div');
+                that.els.template.innerHTML = answer[that.options.responseTemplateName];
+                that.fetchData();
+            }, function (error) {
+                console.warn('Error has occurred during fetching template from given URL');
+                return error;
+            });
         }
     }
 };
