@@ -14,10 +14,12 @@ Popup module
 
 ## Options
 * **data-url** - URL to get data form *Default: false*
+* **data-template-url** - URL to get template form *Default: false*
 * **data-data** - Pass data in JSON-encoded format *Default: false*
 * **data-template** - Template selector to search in document *Default: false*
 * **data-delimiters** - Delimiters to parse variables in template *Default: "{{,}}"*
 * **data-response-data-name** - Object name with Data fetched from server with data-url *Default: "data"*
+* **data-response-template-name** - Object name with template fetched from server with data-url *Default: "template"*
 
 ## Local Development
 
