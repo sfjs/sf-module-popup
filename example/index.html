@@ -12,12 +12,12 @@
     Open Popup
 </div>
 
-<div class="js-sf-popup" data-template-url="template.php"
-     data-data='{"name":"John","url":"anotherURL","buttons":{"labels":{"first":"Send form"}}}'>
-    Open second Popup
-</div>
+<!--<div class="js-sf-popup" data-template-url="template.php"-->
+     <!--data-data='{"name":"John","url":"anotherURL","buttons":{"labels":{"first":"Send form"}}}'>-->
+    <!--Open second Popup-->
+<!--</div>-->
 
-<script type="text/x-handlebars-template" id="template">
+<template id="template" style="display: none;">
     <form action="{{url}}.php" class="js-sf-form">
     <h1>Lorem Ipsum</h1>
     <h2>Hello, {{name}}</h2>
@@ -28,7 +28,14 @@
         <button class="submit">{{buttons.labels.first}}</button>
     </div>
     </form>
-</script>
+    <script type="text/html" data-initial="1">
+        console.log('Initial script');
+    </script>
+    <script type="text/html">
+        console.log('Script is performed');
+    </script>
+</template>
+
 
 <script src="sf.min.js"></script>
 <script src="sf.form.min.js"></script>

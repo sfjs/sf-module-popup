@@ -136,7 +136,25 @@ Popup.prototype.parseTemplate = function () {
 
     this.els.modal.innerHTML = template;
     this.modalReady = true;
-    this.openPopup();
+    this.openPopup(true); //true - opened for the first time
+};
+
+Popup.prototype.runInternalScripts = function (withoutInitial) {
+    var scripts = this.els.modal.getElementsByTagName('script');
+    window.scripts = scripts;
+
+    for (var i = 0; i < scripts.length ; i++) {
+        var node = scripts[i], parent = node.parentElement, executable = document.createElement('script');
+
+        if (typeof node.dataset.initial !== 'undefined') {
+            if (withoutInitial) continue;
+            executable.dataset.initial = node.dataset.initial;
+        }
+
+        executable.innerHTML = node.innerHTML;
+        parent.insertBefore(executable, node);
+        parent.removeChild(node);
+    }
 };
 
 Popup.prototype.generatePopup = function () {
@@ -181,10 +199,12 @@ Popup.prototype.fetchData = function () {
     }
 };
 
-Popup.prototype.openPopup = function () {
+Popup.prototype.openPopup = function (firstTime) {
+    firstTime = typeof firstTime !== 'undefined';
     var that = this;
     document.body.appendChild(this.els.modal);
     document.body.appendChild(this.els.backdrop);
+    this.runInternalScripts(!firstTime); //true - to run scripts without initial ones, i.e. on 2,3... time
     setTimeout(function(){
         that.els.modal.classList.add('visible');
         that.els.backdrop.classList.add('visible');

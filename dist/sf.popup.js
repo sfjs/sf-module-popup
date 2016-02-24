@@ -228,7 +228,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var match,
 	        that = this,
 	        variable,
-	        template = this.els.template.innerHTML;
+	        template = this.els.template.innerHTML,
+	        scripts;
 	
 	    while (match = this.pattern.exec(template)) {
 	        variable = match[0].substring(that.options.delimiters[0].length, match[0].length - that.options.delimiters[1].length);
@@ -237,8 +238,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    this.els.modal.innerHTML = template;
+	
 	    this.modalReady = true;
-	    this.openPopup();
+	    this.openPopup(true); //true - opened for the first time
+	};
+	
+	Popup.prototype.runInternalScripts = function (withoutInitial) {
+	    //withoutInitial = typeof withoutInitial !== 'undefined';
+	    var scripts = this.els.modal.getElementsByTagName('script');
+	    window.scripts = scripts;
+	
+	    for (var i = 0; i < scripts.length; i++) {
+	        var node = scripts[i],
+	            parent = node.parentElement,
+	            executable = document.createElement('script');
+	
+	        if (typeof node.dataset.initial !== 'undefined') {
+	            if (withoutInitial) continue;
+	            executable.dataset.initial = node.dataset.initial;
+	        }
+	
+	        executable.innerHTML = node.innerHTML;
+	        parent.insertBefore(executable, node);
+	        parent.removeChild(node);
+	    }
 	};
 	
 	Popup.prototype.generatePopup = function () {
@@ -283,10 +306,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	};
 	
-	Popup.prototype.openPopup = function () {
+	Popup.prototype.openPopup = function (firstTime) {
+	    firstTime = typeof firstTime !== 'undefined';
 	    var that = this;
 	    document.body.appendChild(this.els.modal);
 	    document.body.appendChild(this.els.backdrop);
+	    this.runInternalScripts(!firstTime); //true - to run scripts without initial ones, i.e. on 2,3... time
 	    setTimeout(function () {
 	        that.els.modal.classList.add('visible');
 	        that.els.backdrop.classList.add('visible');
