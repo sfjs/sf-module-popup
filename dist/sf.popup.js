@@ -140,6 +140,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.els.backdrop.classList.add('sf-popup-backdrop');
 	
 	    this.addEventListeners();
+	
+	    this.events = new sf.modules.core.Events(["show"]);
 	};
 	
 	Popup.prototype.optionsToGrab = {
@@ -228,8 +230,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var match,
 	        that = this,
 	        variable,
-	        template = this.els.template.innerHTML,
-	        scripts;
+	        template = this.els.template.innerHTML;
 	
 	    while (match = this.pattern.exec(template)) {
 	        variable = match[0].substring(that.options.delimiters[0].length, match[0].length - that.options.delimiters[1].length);
@@ -238,13 +239,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    this.els.modal.innerHTML = template;
-	
 	    this.modalReady = true;
 	    this.openPopup(true); //true - opened for the first time
 	};
 	
 	Popup.prototype.runInternalScripts = function (withoutInitial) {
-	    //withoutInitial = typeof withoutInitial !== 'undefined';
 	    var scripts = this.els.modal.getElementsByTagName('script');
 	    window.scripts = scripts;
 	
@@ -316,6 +315,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        that.els.modal.classList.add('visible');
 	        that.els.backdrop.classList.add('visible');
 	    }, 0);
+	
+	    this.events.trigger("show", this.options);
 	};
 	
 	Popup.prototype.closePopup = function () {

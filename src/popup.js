@@ -40,6 +40,8 @@ Popup.prototype._construct = function (sf, node, options) {
     this.els.backdrop.classList.add('sf-popup-backdrop');
 
     this.addEventListeners();
+
+    this.events = new sf.modules.core.Events(["show"]);
 };
 
 Popup.prototype.optionsToGrab =
@@ -209,6 +211,9 @@ Popup.prototype.openPopup = function (firstTime) {
         that.els.modal.classList.add('visible');
         that.els.backdrop.classList.add('visible');
     }, 0);
+
+    this.events.trigger("show", this.options);
+
 };
 
 Popup.prototype.closePopup = function () {
