@@ -132,16 +132,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.pattern = new RegExp("\\" + this.options.delimiters[0] + ".*?(?=" + this.options.delimiters[1] + ")" + this.options.delimiters[1]);
 	    this.matches = [];
 	
-	    if (!this.options.data && !this.options.url) console.warn('No data or URL to fetch data provided');
-	    if (!this.options.templateSelector && !this.options.templateURL) console.warn('No template selector or URL provided');
-	    if (!this.els.template && this.options.templateSelector) console.warn('No template found with provided selector');
+	    if (!this.options.templateSelector && !this.options.templateURL) {
+	        //if there is no template, then create content node
+	        this.els.contentNode = document.createElement("div");
+	        this.els.modal.appendChild(this.els.contentNode);
+	        this.modalReady = true;
+	    } else {
+	        if (!this.els.template && this.options.templateSelector) console.warn('No template found with provided selector');
+	        if (!this.options.data && !this.options.url) console.warn('No data or URL to fetch data provided');
+	    }
 	
 	    this.els.modal.classList.add('sf-popup-modal');
 	    this.els.backdrop.classList.add('sf-popup-backdrop');
 	
 	    this.addEventListeners();
 	
-	    this.events = new sf.modules.core.Events(["show"]);
+	    this.events = new sf.modules.core.Events(["show", "hide"]);
 	};
 	
 	Popup.prototype.optionsToGrab = {
@@ -211,6 +217,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	};
 	
+	Popup.prototype.getContentNode = function () {
+	    return this.els.contentNode ? this.els.contentNode : this.els.modal;
+	};
+	
 	Popup.prototype.deepObjectValue = function (o, s) {
 	    s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
 	    s = s.replace(/^\./, ''); // strip a leading dot
@@ -265,6 +275,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	Popup.prototype.generatePopup = function () {
 	    if (this.modalReady) {
+	        // || (...) - case when there is no data to parse (custom data through content-node)
 	        this.openPopup();
 	    } else {
 	        this.fetchData();
@@ -327,6 +338,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    setTimeout(function () {
 	        that.els.modal.parentNode.removeChild(that.els.modal);
 	        that.els.backdrop.parentNode.removeChild(that.els.backdrop);
+	        that.events.trigger("hide", that.options);
 	    }, 300);
 	};
 	

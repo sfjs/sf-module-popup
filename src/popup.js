@@ -31,17 +31,22 @@ Popup.prototype._construct = function (sf, node, options) {
     this.pattern = new RegExp("\\"+this.options.delimiters[0] + ".*?(?=" + this.options.delimiters[1] + ")" + this.options.delimiters[1]);
     this.matches = [];
 
-    if (!this.options.data && !this.options.url) console.warn('No data or URL to fetch data provided');
-    if (!this.options.templateSelector && !this.options.templateURL) console.warn('No template selector or URL provided');
-    if (!this.els.template && this.options.templateSelector) console.warn('No template found with provided selector');
-
+    if (!this.options.templateSelector && !this.options.templateURL) { //if there is no template, then create content node
+        this.els.contentNode = document.createElement("div");
+        this.els.modal.appendChild(this.els.contentNode);
+        this.modalReady = true;
+    } else {
+        if (!this.els.template && this.options.templateSelector) console.warn('No template found with provided selector');
+        if (!this.options.data && !this.options.url) console.warn('No data or URL to fetch data provided');
+    }
 
     this.els.modal.classList.add('sf-popup-modal');
     this.els.backdrop.classList.add('sf-popup-backdrop');
 
     this.addEventListeners();
 
-    this.events = new sf.modules.core.Events(["show"]);
+    this.events = new sf.modules.core.Events(["show", "hide"]);
+
 };
 
 Popup.prototype.optionsToGrab =
@@ -110,6 +115,10 @@ Popup.prototype.optionsToGrab =
         domAttr: "data-template-url"
     }
 
+};
+
+Popup.prototype.getContentNode = function () {
+    return this.els.contentNode ? this.els.contentNode : this.els.modal;
 };
 
 Popup.prototype.deepObjectValue = function (o, s) {
@@ -224,6 +233,7 @@ Popup.prototype.closePopup = function () {
     setTimeout(function(){
         that.els.modal.parentNode.removeChild(that.els.modal);
         that.els.backdrop.parentNode.removeChild(that.els.backdrop);
+        that.events.trigger("hide", that.options);
     }, 300);
 
 };

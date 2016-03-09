@@ -7,15 +7,14 @@
 </head>
 <body>
 
+<div class="js-sf-popup">
+    Custom Popup
+</div>
+
 <div class="js-sf-popup" data-template="#template" data-url="response.php" data-delimiters="{{,}}"
      data-data='{"name":"John","buttons":{"labels":{"first":"Send form"}}}'>
     Open Popup
 </div>
-
-<!--<div class="js-sf-popup" data-template-url="template.php"-->
-     <!--data-data='{"name":"John","url":"anotherURL","buttons":{"labels":{"first":"Send form"}}}'>-->
-    <!--Open second Popup-->
-<!--</div>-->
 
 <template id="template" style="display: none;">
     <form action="{{url}}.php" class="js-sf-form">
@@ -40,6 +39,16 @@
 <script src="sf.min.js"></script>
 <script src="sf.form.min.js"></script>
 <script src="../dist/sf.popup.min.js"></script>
+<script>
+    var popup = sf.getInstances('popup')[0];
+
+    popup.instance.events.on("show", function (options) {
+        console.log("show");
+    });
+    popup.instance.events.on("hide", function (options) {
+        console.log("hide");
+    });
+</script>
 
 </body>
 </html>
