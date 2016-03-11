@@ -1,6 +1,4 @@
-# sf-module-popup
-
-Popup module
+# Popup module for sf.js
 
 ## Usage Example
 ```html
@@ -20,6 +18,35 @@ Popup module
 * **data-delimiters** - Delimiters to parse variables in template *Default: "{{,}}"*
 * **data-response-data-name** - Object name with Data fetched from server with data-url *Default: "data"*
 * **data-response-template-name** - Object name with template fetched from server with data-url *Default: "template"*
+ 
+## Events
+* **show** - is being triggered on each popup opening
+* **hide** - is being triggered on each popup closing
+ 
+#### Usage Example
+```javascript
+    var popup = sf.addInstance("popup", document.getElementById('js-custom-popup'));
+
+    popup.events.on("show", function (options) {
+        ...
+    });
+    popup.events.on("hide", function (options) {
+        ...
+    });
+```
+
+## Methods
+* **getContentNode** - returns modal-node where content is meant to be passed
+ 
+#### Usage Example
+```javascript
+    var popup = sf.addInstance("popup", document.getElementById('js-custom-popup'));
+
+    popup.getContentNode().innerHTML="<h1>Hello, World!</h1>";
+```
+ 
+
+
 
 ## Local Development
 
