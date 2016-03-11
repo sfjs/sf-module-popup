@@ -7,7 +7,7 @@
 </head>
 <body>
 
-<div class="js-sf-popup">
+<div id="js-custom-popup">
     Custom Popup
 </div>
 
@@ -40,12 +40,14 @@
 <script src="sf.form.min.js"></script>
 <script src="../dist/sf.popup.min.js"></script>
 <script>
-    var popup = sf.getInstances('popup')[0];
+    var popup = sf.addInstance("popup", document.getElementById('js-custom-popup'));
 
-    popup.instance.events.on("show", function (options) {
+    popup.getContentNode().innerHTML="<h1>Hello, World!</h1>";
+
+    popup.events.on("show", function (options) {
         console.log("show");
     });
-    popup.instance.events.on("hide", function (options) {
+    popup.events.on("hide", function (options) {
         console.log("hide");
     });
 </script>

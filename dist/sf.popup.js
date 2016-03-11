@@ -275,7 +275,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	Popup.prototype.generatePopup = function () {
 	    if (this.modalReady) {
-	        // || (...) - case when there is no data to parse (custom data through content-node)
 	        this.openPopup();
 	    } else {
 	        this.fetchData();
